@@ -1,81 +1,67 @@
-import "./LoginForm.css";
-import "bootstrap/dist/css/bootstrap.min.css";
 import { useState } from "react";
-import Button from "react-bootstrap/Button";
-import Form from "react-bootstrap/Form";
-import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+
+import { Button, Form, Row, Col } from "react-bootstrap";
+
+import authApi from "../../../apis/auth.api";
 import { adminAuthLogin } from "../../store/actions/adminAuthAction";
 
 function AdminLoginPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
 
-  const isLogin = useSelector((state) => state.adminAuthReducer.isLogin);
+  const handleSubmit = (event) => {
+    event.preventDefault();
 
-  if (isLogin) {
-    navigate("/admin");
-  }
+    // TODO: Validate
 
-  const handleSubmit = (e) => {
-    if (email.length === 0 || password.length === 0) {
-      return;
-    }
+    authApi
+      .login(username, password, "admin")
+      .then((response) => {
+        dispatch(adminAuthLogin(response.token));
 
-    e.preventDefault();
-
-    const formInput = {
-      email: email,
-      password: password,
-    };
-    dispatch(adminAuthLogin(formInput));
-    setErrorMessage("Email hoặc mật khẩu không đúng.");
+        navigate("/admin");
+      })
+      .catch((error) => {
+        alert(error.response.statusText);
+      });
   };
 
   return (
-    <div className="login d-flex justify-content-center align-items-center 100-w vh-100 bg-primary">
-      <div className="40-w p-5 rounded bg-white">
-        <Form>
-          <h3>Sign In Adminstration</h3>
-          <p className="text-danger">{errorMessage}</p>
-          <Form.Group className="mb-3" controlId="formBasicEmail">
-            <Form.Label>Email address</Form.Label>
+    <Row>
+      <Col md={4}></Col>
+      <Col md={4}>
+        <h1 className="text-center my-5">Đăng nhập quản trị viên</h1>
+        <Form onSubmit={handleSubmit}>
+          <Form.Group className="mb-3">
+            <Form.Label>Tên đăng nhập</Form.Label>
             <Form.Control
-              type="email"
-              placeholder="Enter email"
-              onChange={(event) => setEmail(event.target.value)}
-              required
+              type="text"
+              placeholder="Tên đăng nhập"
+              onChange={(event) => setUsername(event.target.value)}
             />
-
-            <Form.Text className="text-muted">
-              We'll never share your email with anyone else.
-            </Form.Text>
           </Form.Group>
-
-          <Form.Group className="mb-3" controlId="formBasicPassword">
-            <Form.Label>Password</Form.Label>
+          <Form.Group className="mb-3">
+            <Form.Label>Mật khẩu</Form.Label>
             <Form.Control
               type="password"
-              placeholder="Password"
+              placeholder="Mật khẩu"
               onChange={(event) => setPassword(event.target.value)}
-              required
             />
           </Form.Group>
-
-          <Button
-            variant="primary"
-            type="submit"
-            onClick={(e) => handleSubmit(e)}
-          >
-            Sign In
-          </Button>
+          <Form.Group className="mb-3 text-center">
+            <Button type="submit" variant="primary">
+              Đăng nhập
+            </Button>
+          </Form.Group>
         </Form>
-      </div>
-    </div>
+      </Col>
+      <Col md={4}></Col>
+    </Row>
   );
 }
 

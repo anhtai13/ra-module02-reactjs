@@ -1,46 +1,30 @@
 import { createReducer } from "@reduxjs/toolkit";
 
-const defaultAdmin = {
-  admin: [
-    { id: 1, email: "admin@gmail.com", password: btoa("admin"), role: "admin" },
-  ],
-};
-
 const adminAuthReducer = createReducer(
-  { isLogin: false, userLogin: null },
+  { isAuthenticate: false, auth: null },
   {
     ADMIN_LOGIN: (state, action) => {
-      // const users = window.localStorage.getItem("users") || [defaultAdmin];
-      const users = defaultAdmin.admin;
-      const input = action.payload;
-
-      let isLogin = false;
-      let userLogin = null;
-
-      for (const user of users) {
-        if (user.email === input.email) {
-          if (user.role === "admin" && atob(user.password) === input.password) {
-            // window.localStorage.setItem("adminAuthLogin", JSON.stringify(user));
-            userLogin = { ...user };
-            isLogin = true;
-          }
-          break;
-        }
-      }
+      window.localStorage.setItem("X-API-Key", action.payload);
 
       return {
         ...state,
-        isLogin: isLogin,
-        userLogin: userLogin,
+        isAuthenticate: true,
       };
     },
-
-    ADMIN_LOGOUT: (state, action) => {
-      // window.localStorage.removeItem("adminAuthLogin");
+    ADMIN_SET_AUTH: (state, action) => {
       return {
         ...state,
-        userLogin: null,
-        isLogin: false,
+        isAuthenticate: true,
+        auth: action.payload,
+      };
+    },
+    ADMIN_LOGOUT: (state, action) => {
+      window.localStorage.removeItem("X-API-Key");
+
+      return {
+        ...state,
+        isAuthenticate: false,
+        auth: null,
       };
     },
   }

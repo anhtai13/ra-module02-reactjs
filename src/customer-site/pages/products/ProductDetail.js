@@ -1,16 +1,12 @@
-import Button from "react-bootstrap/Button";
-import Card from "react-bootstrap/Card";
-import Form from "react-bootstrap/Form";
-import Badge from "react-bootstrap/Badge";
-import Stack from "react-bootstrap/Stack";
+import { Button, Card, Form, Badge, Stack } from "react-bootstrap";
+import { getStaticResourceUrl } from "../../utilities/getStaticResource";
+
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../../store/actions/customerCartAction";
 import { useNavigate } from "react-router-dom";
 
 function ProductDetail({ product }) {
-  // console.log(product);
-  const [searchValue, setSearchValue] = useState("");
   const [quantity, setQantity] = useState(1);
   const dispatch = useDispatch();
   let customerLogin = useSelector(
@@ -41,10 +37,10 @@ function ProductDetail({ product }) {
   return (
     <div>
       <Card>
-        <Card.Img variant="top" src={product.imageUrl} />
+        <Card.Img variant="top" src={product.image} />
         <Card.Body>
-          <Card.Title>{product.nameProduct}</Card.Title>
-          <Badge bg="secondary">${product.unitPrice}</Badge>
+          <Card.Title>{product.name}</Card.Title>
+          <Badge bg="secondary">{product.unit_price.toLocaleString()} đ</Badge>
           <Card.Text>{product.description}</Card.Text>
           <Stack direction="horizontal" gap={3}>
             <Form.Control

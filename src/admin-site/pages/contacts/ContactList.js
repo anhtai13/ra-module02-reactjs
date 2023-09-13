@@ -7,24 +7,12 @@ import AdminPaginationComponent, {
   NUMBER_RECORDS_PER_PAGE,
 } from "../../components/table/AdminPaginationComponent";
 
-import userApi from "../../../apis/user.api";
+import contactApi from "../../../apis/contact.api";
 
-const formatName = (firstName, lastName) => {
-  return (firstName || "") + " " + (lastName || "");
-};
-
-const formatRole = (role) => {
-  if (role === 1) {
-    return <Badge bg="warning">Quản trị viên</Badge>;
-  } else if (role === 2) {
-    return <Badge>Khách hàng</Badge>;
-  }
-};
-
-function UserList() {
+function ContactList() {
   const navigate = useNavigate();
 
-  const [users, setUsers] = useState([]);
+  const [contact, setContact] = useState([]);
   const [total, setTotal] = useState(0);
 
   const [searchInputValue, setSearchInputValue] = useState("");
@@ -32,17 +20,17 @@ function UserList() {
   const [keyword, setKeyword] = useState(null);
   const [page, setPage] = useState(1);
 
-  const [selectedUserIds, setSelectedUserIds] = useState([]);
+  const [selectedContactIds, setSelectedContactIds] = useState([]);
 
-  const fetchUsers = () => {
-    userApi
-      .searchUsers({
+  const fetchContact = () => {
+    contactApi
+      .searchContacts({
         name: keyword,
         page: page,
         limit: NUMBER_RECORDS_PER_PAGE,
       })
       .then((data) => {
-        setUsers(data.records);
+        setContact(data.records);
         setTotal(data.total);
       })
       .catch((error) => {
@@ -54,11 +42,11 @@ function UserList() {
         }
       });
 
-    setSelectedUserIds([]);
+    setSelectedContactIds([]);
   };
 
   useEffect(() => {
-    fetchUsers();
+    fetchContact();
   }, [keyword, page]);
 
   const handleSearch = (event) => {
@@ -67,41 +55,43 @@ function UserList() {
   };
 
   const handleAdd = () => {
-    navigate("/admin/users/new");
+    navigate("/admin/contacts/new");
   };
 
   const handleEdit = (id) => {
-    navigate(`/admin/users/${id}/edit`);
+    navigate(`/admin/contacts/${id}/edit`);
   };
 
   const handleBulkDelete = () => {
-    const usernames = users
+    const full_name = contact
       .filter(
-        (user) =>
-          !!selectedUserIds.find(
-            (selectedUserId) => selectedUserId === user.user_id
+        (contact) =>
+          !!selectedContactIds.find(
+            (selectedContactIds) => selectedContactIds === contact.contact_id
           )
       )
-      .map((user) => user.username);
+      .map((contact) => contact.full_name);
 
     if (
       window.confirm(
-        `Bạn có chắc chắn muốn xóa người dùng [${usernames}] không ?`
+        `Bạn có chắc chắn muốn xóa người dùng [${full_name}] không ?`
       )
     ) {
       // TODO
-      fetchUsers();
+      fetchContact();
     }
   };
 
-  const handleDelete = (id, username) => {
+  const handleDelete = (contact_id, full_name) => {
     if (
-      window.confirm(`Bạn có chắc chắn muốn xóa người dùng ${username} không ?`)
+      window.confirm(
+        `Bạn có chắc chắn muốn xóa người dùng ${full_name} không ?`
+      )
     ) {
-      userApi
-        .deleteUser(id)
+      contactApi
+        .deleteContact(contact_id)
         .then(() => {
-          fetchUsers();
+          fetchContact();
         })
         .catch((error) => {
           if (error.response.status === 401) {
@@ -114,28 +104,33 @@ function UserList() {
     }
   };
 
-  const changeUserIdCheckbox = (event) => {
+  const changeContactIdCheckbox = (event) => {
     if (event.target.checked) {
-      setSelectedUserIds([...selectedUserIds, parseInt(event.target.value)]);
+      setSelectedContactIds([
+        ...selectedContactIds,
+        parseInt(event.target.value),
+      ]);
     } else {
-      const newSelectedUserIds = selectedUserIds.filter(
-        (selectedUserId) => selectedUserId !== parseInt(event.target.value)
+      const newSelectedContactIds = selectedContactIds.filter(
+        (selectedContactIds) =>
+          selectedContactIds !== parseInt(event.target.value)
       );
-      setSelectedUserIds(newSelectedUserIds);
+      setSelectedContactIds(newSelectedContactIds);
     }
   };
 
-  const selectAllUserIdCheckboxes = (event) => {
+  const selectAllContactIdCheckboxes = (event) => {
     if (event.target.checked) {
-      const userIds = users.map((user) => user.user_id);
-      setSelectedUserIds(userIds);
+      const contactIds = contact.map((contact) => contact.contact_id);
+      setSelectedContactIds(contactIds);
     } else {
-      setSelectedUserIds([]);
+      setSelectedContactIds([]);
     }
   };
 
-  const isSelectedAllUserId =
-    selectedUserIds.length !== 0 && selectedUserIds.length === users.length;
+  const isSelectedAllContactId =
+    selectedContactIds.length !== 0 &&
+    selectedContactIds.length === contact.length;
 
   return (
     <>
@@ -153,10 +148,8 @@ function UserList() {
           <Button type="submit" variant="info mx-1">
             Tìm kiếm
           </Button>
-          <Button type="button" variant="primary mx-1" onClick={handleAdd}>
-            Thêm mới
-          </Button>
-          {selectedUserIds.length !== 0 && (
+
+          {selectedContactIds.length !== 0 && (
             <Button
               type="button"
               variant="danger mx-1"
@@ -173,51 +166,51 @@ function UserList() {
             <th>
               <Form.Check
                 type="checkbox"
-                onChange={selectAllUserIdCheckboxes}
-                checked={isSelectedAllUserId}
+                onChange={selectAllContactIdCheckboxes}
+                checked={isSelectedAllContactId}
               />
             </th>
-            <th>Tên đăng nhập</th>
+            <th>Họ và tên</th>
             <th>Địa chỉ E-mail</th>
-            <th>Tên người dùng</th>
-            <th>Vai trò</th>
+            <th>Trạng thái</th>
             <th>Thời gian tạo</th>
             <th>Thời gian cập nhật</th>
             <th>Hành động</th>
           </tr>
         </thead>
         <tbody>
-          {users.map((user, index) => {
+          {contact.map((contact, index) => {
             return (
               <tr key={index}>
                 <td>
                   <Form.Check
                     type="checkbox"
                     name="id"
-                    id={"id-" + user.id}
-                    value={user.id}
-                    onChange={changeUserIdCheckbox}
-                    checked={selectedUserIds.find((id) => id === user.id)}
+                    id={"id-" + contact.contact_id}
+                    value={contact.contact_id}
+                    onChange={changeContactIdCheckbox}
+                    checked={selectedContactIds.find((id) => id === contact.id)}
                   />
                 </td>
-                <td>{user.username}</td>
-                <td>{user.email}</td>
-                <td>{formatName(user.first_name, user.last_name)}</td>
-                <td>{formatRole(user.role)}</td>
-                <td>{moment(user.created_at).format("YYYY-MM-DD HH:mm")}</td>
-                <td>{moment(user.updated_at).format("YYYY-MM-DD HH:mm")}</td>
+                <td>{contact.full_name}</td>
+                <td>{contact.email}</td>
+                <td>{contact.status}</td>
+                <td>{moment(contact.created_at).format("YYYY-MM-DD HH:mm")}</td>
+                <td>{moment(contact.updated_at).format("YYYY-MM-DD HH:mm")}</td>
                 <td>
                   <Button
                     variant="warning"
                     className="m-1"
-                    onClick={() => handleEdit(user.id)}
+                    onClick={() => handleEdit(contact.contact_id)}
                   >
-                    Sửa
+                    Cập nhật
                   </Button>
                   <Button
                     variant="danger"
                     className="m-1"
-                    onClick={() => handleDelete(user.id, user.username)}
+                    onClick={() =>
+                      handleDelete(contact.contact_id, contact.full_name)
+                    }
                   >
                     Xóa
                   </Button>
@@ -232,4 +225,4 @@ function UserList() {
   );
 }
 
-export default UserList;
+export default ContactList;

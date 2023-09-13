@@ -24,6 +24,7 @@ const customerAuthReducer = createReducer(
 
     CUSTOMER_LOGIN: (state, action) => {
       //   window.localStorage.removeItem("customerLogout");
+      window.localStorage.setItem("X-API-Key", action.payload);
       return {
         ...state,
         customerLogin: action.payload,

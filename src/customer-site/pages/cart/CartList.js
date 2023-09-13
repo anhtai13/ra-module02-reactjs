@@ -7,30 +7,25 @@ import {
   changeQuantity,
   checkOut,
 } from "../../store/actions/customerCartAction";
+import { useNavigate } from "react-router-dom";
+
+import orderApi from "../../../apis/order.api";
 
 function CartList() {
-  
   const cart = useSelector((state) => state.customerCartReducer.cart) ?? [];
 
   const total = useSelector((state) => state.customerCartReducer.total);
 
-  const order = useSelector((state) => state.customerCartReducer.order);
-
-  const email = useSelector(
-    (state) => state.customerAuthReducer.customerLogin.email
-  );
-
   const dispatch = useDispatch();
-
-
+  const navigate = useNavigate;
   const handleChange = (e, id) => {
     const quantity = Number(e.target.value);
 
     if (quantity > 0) {
       dispatch(
         changeQuantity({
-          id,
-          quantity,
+          product_id: id,
+          quantity: quantity,
         })
       );
     }
@@ -45,16 +40,26 @@ function CartList() {
       "Bạn có chắc chắn muốn đặt đơn hàng này ?"
     );
     if (isCheckout) {
-      dispatch(
-        checkOut({
-          id: order.length ? order[order.length - 1].id + 1 : 1,
-          email: email,
-          item: cart,
-          total: total,
+      orderApi
+        .createOrder({
+          cart: cart,
         })
-      );
+        .then(() => {
+          alert("Đã đặt hàng thành công");
+          dispatch(checkOut());
+        })
+        .catch((error) => {
+          console.log("error", error);
+          if (error.response.status === 401) {
+            alert(error.response.statusText);
+            navigate("/login");
+          } else {
+            alert(error.response.statusText);
+          }
+        });
     }
   };
+
   return (
     <div>
       <div>
@@ -74,20 +79,22 @@ function CartList() {
               return (
                 <tr>
                   <td>{index + 1}</td>
-                  <td>{item.nameProduct}</td>
-                  <td>${item.unitPrice}</td>
+                  <td>{item.name}</td>
+                  <td>{item.unit_price.toLocaleString()} đ</td>
                   <td>
                     <Form.Control
                       type="number"
                       value={item.quantity}
-                      onChange={(e) => handleChange(e, item.id)}
+                      onChange={(e) => handleChange(e, item.product_id)}
                     />
                   </td>
-                  <td>${item.subTotal}</td>
+                  <td>
+                    {(item.unit_price * item.quantity).toLocaleString()} đ
+                  </td>
                   <td>
                     <Button
                       variant="danger"
-                      onClick={() => handleDelete(item.id)}
+                      onClick={() => handleDelete(item.product_id)}
                     >
                       Delete
                     </Button>
@@ -99,7 +106,7 @@ function CartList() {
           <tfoot>
             <tr>
               <td colSpan={4}>Tổng giá đơn hàng</td>
-              <td>${total}</td>
+              <td>{total.toLocaleString()} đ</td>
               <td>
                 <Button class="btn btn-info" onClick={handleCheckOut}>
                   Order

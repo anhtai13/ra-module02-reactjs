@@ -1,9 +1,13 @@
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
+import { Col, Row, Form, Button } from "react-bootstrap";
 import ProductDetail from "./ProductDetail";
-import { useSelector } from "react-redux";
-import Form from "react-bootstrap/Form";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
+import AdminPaginationComponent, {
+  NUMBER_RECORDS_PER_PAGE,
+} from "../../../admin-site/components/table/AdminPaginationComponent";
+
+import productApi from "../../../apis/product.api";
 
 const getRows = (products) => {
   let rows = [];
@@ -25,33 +29,68 @@ const getRows = (products) => {
 };
 
 function ProductList() {
-  const products = useSelector((state) => state.productAdReducer.products);
+  const navigate = useNavigate();
+
+  const [products, setProducts] = useState([]);
+  const [total, setTotal] = useState(0);
+
+  const [searchInputValue, setSearchInputValue] = useState("");
+
+  const [keyword, setKeyword] = useState(null);
+  const [page, setPage] = useState(1);
 
   const rows = getRows(products);
 
-  const [searchValue, setSearchValue] = useState("");
+  const fetchProducts = () => {
+    productApi
+      .searchProducts({
+        name: keyword,
+        page: page,
+        limit: 9,
+      })
+      .then((data) => {
+        setProducts(data.records);
+        setTotal(data.total);
+      })
+      .catch((error) => {
+        if (error.respone.status === 401) {
+          alert(error.respone.statusText);
+          navigate("/customer/login");
+        } else {
+          alert(error.respone.statusText);
+        }
+      });
+  };
 
-  const filteredRows = getRows(products).filter((row) => {
-    return row.some((product) =>
-      product.nameProduct.toLowerCase().includes(searchValue.toLowerCase())
-    );
-  });
+  useEffect(() => {
+    fetchProducts();
+  }, [keyword, page]);
+
+  const handleSearch = (event) => {
+    event.preventDefault();
+    setKeyword(searchInputValue);
+  };
 
   return (
     <div className="text-center mt-3">
-      <div className="pb-4">
-        <Form.Control
-          type="search"
-          placeholder="Search"
-          aria-label="Search"
-          onChange={(e) => {
-            setSearchValue(e.target.value.toString());
-          }}
-        />
-      </div>
+      <Form className="row m-1 mb-3" onSubmit={handleSearch}>
+        <div className="col-8">
+          <Form.Control
+            type="text"
+            value={searchInputValue}
+            onChange={(event) => setSearchInputValue(event.target.value)}
+            placeholder="Nhập từ khóa"
+          />
+        </div>
+        <div className="col-4">
+          <Button type="submit" variant="info mx-1">
+            Tìm kiếm
+          </Button>
+        </div>
+      </Form>
 
       <div>
-        {filteredRows.map((row, index) => {
+        {rows.map((row, index) => {
           return (
             <Row key={index}>
               {row.map((product, index) => {
@@ -65,6 +104,7 @@ function ProductList() {
           );
         })}
       </div>
+      <AdminPaginationComponent total={total} setPage={setPage} />
     </div>
   );
 }

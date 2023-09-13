@@ -1,46 +1,65 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { Pagination } from "react-bootstrap";
 
-function AdminPaginationComponent() {
+export const NUMBER_RECORDS_PER_PAGE = 5;
+
+function AdminPaginationComponent({ total, setPage }) {
   const [currentPage, setCurrentPage] = useState(1);
 
-  const handlePageClick = (pageNumber) => {
-    setCurrentPage(pageNumber);
+  const totalPage = Math.ceil(total / NUMBER_RECORDS_PER_PAGE);
+
+  const handleChangePage = (pageNumber) => {
+    const page = parseInt(pageNumber);
+
+    setCurrentPage(page);
+    setPage(page);
   };
 
+  const items = [];
+
+  for (let pageNumber = 1; pageNumber <= totalPage; pageNumber++) {
+    const item = (
+      <Pagination.Item
+        key={pageNumber}
+        onClick={() => handleChangePage(pageNumber)}
+        active={pageNumber === currentPage}
+      >
+        {pageNumber}
+      </Pagination.Item>
+    );
+
+    items.push(item);
+  }
+
   return (
-    <nav aria-label="Page navigation example">
-      <ul className="pagination justify-content-center">
-        <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-          <a
-            className="page-link"
-            href="#"
-            tabIndex="-1"
-            onClick={() => handlePageClick(currentPage - 1)}
-          >
-            Previous
-          </a>
-        </li>
-        <li className={`page-item ${currentPage === 1 ? "active" : ""}`}>
-          <a className="page-link" href="#" onClick={() => handlePageClick(1)}>
-            1
-          </a>
-        </li>
-        <li className={`page-item ${currentPage === 2 ? "active" : ""}`}>
-          <a className="page-link" href="#" onClick={() => handlePageClick(2)}>
-            2
-          </a>
-        </li>
-        <li className={`page-item ${currentPage === 2 ? "disabled" : ""}`}>
-          <a
-            className="page-link"
-            href="#"
-            onClick={() => handlePageClick(currentPage + 1)}
-          >
-            Next
-          </a>
-        </li>
-      </ul>
-    </nav>
+    <>
+      <Pagination className="float-end">
+        <Pagination.First
+          disabled={currentPage === 1}
+          onClick={() => handleChangePage(1)}
+        />
+        <Pagination.Prev
+          disabled={currentPage === 1}
+          onClick={() => handleChangePage(currentPage - 1)}
+        />
+
+        {items.map((item) => {
+          return item;
+        })}
+
+        <Pagination.Next
+          disabled={currentPage === totalPage}
+          onClick={() => handleChangePage(currentPage + 1)}
+        />
+        <Pagination.Last
+          disabled={currentPage === totalPage}
+          onClick={() => handleChangePage(totalPage)}
+        />
+      </Pagination>
+      <p className="float-end mx-3">
+        <strong>Tổng số bản ghi:</strong> {total}
+      </p>
+    </>
   );
 }
 

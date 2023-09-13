@@ -2,6 +2,7 @@ import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
 import { useDispatch, useSelector } from "react-redux";
 import { deleteFromOrder } from "../../store/actions/customerCartAction";
+// import orderApi from "../../../apis/orderApi.api";
 
 function OrderList() {
   const order = useSelector((state) => state.customerCartReducer.order);

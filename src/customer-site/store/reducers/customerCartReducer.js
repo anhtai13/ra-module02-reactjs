@@ -3,7 +3,7 @@ import { createReducer } from "@reduxjs/toolkit";
 const calculateTotal = (cart) => {
   let total = 0;
   for (let item of cart) {
-    total = total + item.subTotal;
+    total = total + item.unit_price * item.quantity;
   }
 
   return total;
@@ -18,14 +18,14 @@ const customerCartReducer = createReducer(
       // Sử dụng hàm map để lập lại các mặt hàng hiện có trong giỏ hàng
       let addCart = state.cart.map((item) => {
         // Nếu có cùng id của mục đó trùng với id được thêm vào
-        if (item.id === action.payload.id) {
+        if (item.product_id === action.payload.product_id) {
           // mặt hàng đó tồn tại trong giỏ hàng
           isExist = true;
           // trong trường hợp đó cập nhật số lượng của đơn hàng và tính tổng số tiền đơn hàng
           return {
             ...item,
             quantity: item.quantity + action.payload.quantity,
-            subTotal: item.unitPrice * item.quantity,
+            subTotal: item.unit_price * item.quantity,
           };
         }
         return item;
@@ -36,7 +36,7 @@ const customerCartReducer = createReducer(
           ...addCart,
           {
             ...action.payload,
-            subTotal: action.payload.unitPrice * action.payload.quantity,
+            subTotal: action.payload.unit_price * action.payload.quantity,
           },
         ];
       }
@@ -45,7 +45,9 @@ const customerCartReducer = createReducer(
     },
 
     DELETE_TO_CART: (state, action) => {
-      const newCart = state.cart.filter((item) => item.id !== action.payload);
+      const newCart = state.cart.filter(
+        (item) => item.product_id !== action.payload
+      );
       return {
         ...state,
         cart: newCart,
@@ -56,11 +58,11 @@ const customerCartReducer = createReducer(
 
     CHANGE_QUANTITY: (state, action) => {
       let cart = state.cart.map((item) => {
-        if (item.id === action.payload.id) {
+        if (item.product_id === action.payload.product_id) {
           return {
             ...item,
             quantity: action.payload.quantity,
-            subTotal: item.unitPrice * item.quantity,
+            subTotal: item.unit_price * item.quantity,
           };
         }
         return item;
@@ -77,11 +79,6 @@ const customerCartReducer = createReducer(
     CHECK_OUT: (state, action) => {
       // Tạo một đôi tượng đơn hàng mới với các mặt hàng hiện tại và thông tin khách hàng
       const newOrder = {
-        // id: action.payload.id,
-        // item: action.payload.item,
-        // total: action.payload.total,
-        // date: new Date().toISOString(),
-        // email: action.payload.email,
         ...action.payload,
         date: new Date().toISOString(),
       };
@@ -97,7 +94,10 @@ const customerCartReducer = createReducer(
     },
 
     DELETE_FROM_ORDER: (state, action) => {
-      const newOrder = state.order.filter((item) => item.id !== action.payload);
+      console.log(action.payload);
+      const newOrder = state.order.filter(
+        (item) => item.product_id !== action.payload
+      );
       return {
         ...state,
         order: newOrder,

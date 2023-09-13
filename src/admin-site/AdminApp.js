@@ -10,11 +10,20 @@ import AdminLayout from "./layouts/AdminLayout";
 import AdminNotFoundPage from "./pages/errors/AdminNotFoundPage";
 import AdminLoginPage from "./pages/auth/AdminLoginPage";
 import AdminHomePage from "./pages/AdminHomePage";
+
 import UserList from "../admin-site/pages/users/UserList";
+import UserCreate from "../admin-site/pages/users/UserCreate";
+import UserEdit from "./pages/users/UserEdit";
+
 import ProductList from "./pages/products/ProductList";
+import ProductCreate from "./pages/products/ProductCreate";
+import ProductEdit from "./pages/products/ProductEdit";
+
 import OrderList from "./pages/orders/OrderList";
-import AdminAdd from "./pages/products/AdminAdd";
-import AdminEdit from "./pages/products/AdminEdit";
+import OrderEdit from "./pages/orders/OrderEdit";
+
+import ContactList from "./pages/contacts/ContactList";
+import ContactEdit from "./pages/contacts/contactEdit";
 
 function AdminApp() {
   return (
@@ -22,11 +31,20 @@ function AdminApp() {
       <Routes>
         <Route path="/login" element={<AdminLoginPage />} />
         <Route path="/" element={<AdminLayout />}>
-          <Route path="/customer" element={<UserList />} />
-          <Route path="/product" element={<ProductList />} />
-          <Route path="/order" element={<OrderList />} />
-          <Route path="/product/add" element={<AdminAdd />} />
-          <Route path="/product/edit/:id" element={<AdminEdit />} />
+          <Route path="users" element={<UserList />} />
+          <Route path="users/new" element={<UserCreate />} />
+          <Route path="users/:id/edit" element={<UserEdit />} />
+
+          <Route path="/products" element={<ProductList />} />
+          <Route path="/products/new" element={<ProductCreate />} />
+          <Route path="/products/:id/edit" element={<ProductEdit />} />
+
+          <Route path="/orders" element={<OrderList />} />
+          <Route path="/orders/:id/edit" element={<OrderEdit />} />
+
+          <Route path="/contacts" element={<ContactList />} />
+          <Route path="/contacts/:id/edit" element={<ContactEdit />} />
+
           <Route index element={<AdminHomePage />} />
           <Route path="*" element={<AdminNotFoundPage />} />
         </Route>

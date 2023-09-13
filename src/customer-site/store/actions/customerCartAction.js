@@ -6,4 +6,5 @@ const changeQuantity = createAction("CHANGE_QUANTITY");
 const checkOut = createAction("CHECK_OUT");
 const deleteFromOrder = createAction("DELETE_FROM_ORDER");
 
+
 export { addToCart, deleteFromCart, changeQuantity, checkOut, deleteFromOrder };

@@ -60,14 +60,14 @@ function CustomerHeaderComponent() {
                   Products
                 </Link>
               </Nav.Link>
-              <Nav.Link>
+              {/* <Nav.Link>
                 <Link
                   to={"/order"}
                   style={{ textDecoration: "none", color: "black" }}
                 >
                   Orders
                 </Link>
-              </Nav.Link>
+              </Nav.Link> */}
               <NavDropdown title="Action" id="navbarScrollingDropdown">
                 <NavDropdown.Item onClick={handleLogoutUser}>
                   Logout
@@ -82,8 +82,6 @@ function CustomerHeaderComponent() {
           </Navbar.Collapse>
         </Container>
       </Navbar>
-
-      
     </div>
   );
 }

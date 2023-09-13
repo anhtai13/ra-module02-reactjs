@@ -1,147 +1,67 @@
-import "bootstrap/dist/css/bootstrap.min.css";
-import Button from "react-bootstrap/Button";
-import Form from "react-bootstrap/Form";
-import { Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { useEffect, useState } from "react";
-import { customerLogin } from "../../store/actions/customerAuthAction";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+
+import { Button, Form, Row, Col } from "react-bootstrap";
+
+import authApi from "../../../apis/auth.api";
+import { customerLogin } from "../../store/actions/customerAuthAction";
 
 function CustomerLoginPage() {
-  let usersDB = useSelector((state) => state.customerAuthReducer.listCustomer);
-
-  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  let [user, setUser] = useState({
-    email: "",
-    password: "",
-  });
-  const [error, setError] = useState({
-    isShowStatus: false,
-    status: false,
-    errorMsg: "",
-  });
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
-  // lấy dữ liệu input
-  const handleGetInput = async (event) => {
-    user[event.target.id] = event.target.value;
-    setUser({ ...user });
-    await validate(user);
-  };
-
-  // handle submit
-  const handleSubmit = async (event) => {
-    // // Lỗi thì ngưng chạy
+  const handleSubmit = (event) => {
     event.preventDefault();
 
-    await validate(user);
-    // console.log("submit");
+    // TODO: Validate
 
-    if (error.status) {
-      // render lỗi và kết thúc
-      await setError({ ...error, isShowStatus: true });
-      return;
-    } else {
-      // render không lỗi
-    }
+    authApi
+      .login(username, password, "customer")
+      .then((response) => {
+        dispatch(customerLogin(response.token));
 
-    //  Kiểm tra email đã đăng ký chưa
-    let isDulicate = false;
-    let userLogin = { ...user };
-
-    usersDB.forEach(async (item) => {
-      if (item.email === user.email && item.password === user.password) {
-        isDulicate = true;
-        userLogin = item;
-      }
-    });
-
-    if (isDulicate === true) {
-      dispatch(customerLogin(userLogin));
-
-      //   Chuyển sang login
-
-      navigate("/");
-    } else if (isDulicate === false) {
-      await setError({
-        ...error,
-        isShowStatus: true,
-        status: true,
-        errorMsg: "Email không tồn tại hoặc mật khẩu không chính xác",
+        navigate("/home");
+      })
+      .catch((error) => {
+        alert(error.response.statusText);
       });
-    }
-  };
-
-  // validate data login
-  const validate = async (data) => {
-    let newError = { ...error }; // Tạo một bản sao của error hiện tại
-
-    if (data.email == "" || data.password == "") {
-      newError.status = true;
-      newError.errorMsg = "Các thông tin không được để trống";
-    } else {
-      newError = { isShowStatus: false, status: false, errorMsg: "" };
-    }
-
-    setError(newError); // Cập nhật error
   };
 
   return (
-    <div className="login d-flex justify-content-center align-items-center 100-w vh-100 bg-primary">
-      <div className="40-w p-5 rounded bg-white">
+    <Row>
+      <Col md={4}></Col>
+      <Col md={4}>
+        <h1 className="text-center my-5">Đăng nhập người dùng</h1>
         <Form onSubmit={handleSubmit}>
-          <h3>Sign In</h3>
-          <Form.Group
-            className="mb-3"
-            // controlId="formBasicEmail"
-          >
-            <Form.Label>Email address</Form.Label>
+          <Form.Group className="mb-3">
+            <Form.Label>Tên đăng nhập</Form.Label>
             <Form.Control
-              type="email"
-              placeholder="Enter email"
-              id="email"
-              onChange={(event) => handleGetInput(event)}
+              type="text"
+              placeholder="Tên đăng nhập"
+              onChange={(event) => setUsername(event.target.value)}
             />
-            <Form.Text className="text-muted">
-              We'll never share your email with anyone else.
-            </Form.Text>
           </Form.Group>
-          <Form.Group
-            className="mb-3"
-            // controlId="formBasicPassword"
-          >
-            <Form.Label>Password</Form.Label>
+          <Form.Group className="mb-3">
+            <Form.Label>Mật khẩu</Form.Label>
             <Form.Control
               type="password"
-              placeholder="Password"
-              id="password"
-              onChange={(event) => handleGetInput(event)}
+              placeholder="Mật khẩu"
+              onChange={(event) => setPassword(event.target.value)}
             />
           </Form.Group>
-          {error.isShowStatus == true && error.status == true && (
-            <p
-              id="Error"
-              style={{
-                textAlign: "center ",
-                color: "#a11515",
-                padding: "20px",
-              }}
-            >
-              {error.errorMsg}
-            </p>
-          )}{" "}
-          <Form.Group className="d-grid mb-3">
-            <Button variant="primary" type="submit">
-              Sign In
+          <Form.Group className="mb-3 text-center">
+            <Button type="submit" variant="primary">
+              Đăng nhập
             </Button>
           </Form.Group>
-          <Form.Group>
-            <Link to={"/register"}>Sign up</Link>
-          </Form.Group>
         </Form>
-      </div>
-    </div>
+      </Col>
+      <Col md={4}></Col>
+    </Row>
   );
 }
 
